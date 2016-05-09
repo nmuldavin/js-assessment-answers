@@ -56,10 +56,5 @@ exports.recursionAnswers = {
       return result;
     }
     return fib;
-  }(),
-
-  validParentheses: function(n) {
-    var out = [];
-    var build = '';
-  }
+  }()
 };

@@ -1,38 +1,38 @@
 exports = (typeof window === 'undefined') ? global : window;
 
 exports.asyncAnswers = {
-  async : function(value) {
-    return new Promise(function(resolve, reject) {
-        resolve(value);
-    })
+  async(value) {
+    return new Promise(resolve => {
+      resolve(value);
+    });
   },
 
-  manipulateRemoteData : function(url) {
+  /**
+   * promisified xhr with data manipulation
+   */
+  manipulateRemoteData(url) {
+    return new Promise((resolve, reject) => {
+      const request = new XMLHttpRequest();
+      request.open('GET', url, true);
 
-    return new Promise(function(resolve, reject) {
-        var request = new XMLHttpRequest();
-        request.open('GET', url, true);
-        var data;
+      request.onload = function xhrOnload() {
+        if (this.status >= 200 && this.status < 400) {
+          resolve(
+            JSON.parse(request.responseText)
+              .people
+              .map(entry => entry.name)
+              .sort()
+          );
+        } else {
+          reject({ status: this.status });
+        }
+      };
 
-        request.onload = function() {
-          if (request.status >= 200 && request.status < 400) {
-            // getting initial data
-            data = JSON.parse(request.responseText);
-            // picking out the part we want
-            data = data.people.map(function(entry) {
-                return entry.name;
-            });
-            // sorting
-            data.sort();
+      request.onerror = function xhrOnerror() {
+        reject({ status: this.status });
+      };
 
-            resolve(data);
-
-          } else {
-            reject('Shit went wrong');
-          }
-        };
-
-        request.send();
-    })
-  }
+      request.send();
+    });
+  },
 };

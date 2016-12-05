@@ -1,60 +1,54 @@
 exports = (typeof window === 'undefined') ? global : window;
 
 exports.recursionAnswers = {
-  listFiles: function(data, dirName) {
-      var out = [];
-      var list = !dirName || data.dir === dirName;
-      for (var i = 0; i < data.files.length; i++) {
-        if (typeof data.files[i] === 'string') {
-          if (list) {
-            out.push(data.files[i]);
-          }
-        } else if (!list) {
-          out = out.concat(this.listFiles(data.files[i], dirName));
-        } else {
-          out = out.concat(this.listFiles(data.files[i]));
+  listFiles(data, dirName) {
+    const shouldList = !dirName || data.dir === dirName;
+    let filesList = [];
+    data.files.forEach(entry => {
+      // if entry is a file
+      if (!entry.dir) {
+        // add it to list if we're in the right directory, or if we don't care
+        if (shouldList) {
+          filesList.push(entry);
         }
+      // else it's a directory, so recurse
+      } else {
+        filesList = filesList.concat(this.listFiles(entry, shouldList ? null : dirName));
       }
-      return out;
-    },
+    });
 
-  permute: function(arr) {
-    var out = [];
-    
-    var innerPermute = function(array, build) {
-      var current;
-
-      for (var i = 0; i < array.length; i++) {
-        // remove one element and save it array form to 'current'
-        current = array.splice(i, 1);
-        // if the array no longer contains elements
-        if (array.length === 0) {
-          // add the current to the build array
-          out.push(build.concat(current));
-        } else {
-          // add current to build array, then permute a copy of remaining array
-          innerPermute(array.slice(), build.concat(current));
-        }
-        // add item back in to array
-        array.splice(i, 0, current[0]);
-      }
-      return out;
-    }
-
-    return innerPermute(arr, []);
-
+    return filesList;
   },
 
-  fibonacci: function() {
-    var memo = [0, 1];
-    var fib = function(n) {
-      var result = memo[n];
-      if (typeof result !== 'number') {
-        result = fib(n - 1) + fib(n - 2);
-        memo[n] = result;
+  permute(arr) {
+    return arr.reduce((accum, val, index, array) => {
+      // copy whole array
+      const rest = array.slice();
+      // remove current element
+      rest.splice(index, 1);
+      // if there are more elements remaining
+      if (rest.length) {
+        // add to accumulated permutations
+        return accum.concat(
+          // the current element added to the front of each permutation of the remaining array
+          this.permute(rest)
+            .map(restPermuted => [val].concat(restPermuted))
+        );
       }
-      return result;
-    }
-    return fib;
-  }()
+      // if no elements remain return value as 2d array
+      return [[val]];
+    }, []);
+  },
+
+  // memoized fibonacci for fun
+  fibonacci: (function fiboWrap() {
+    const memo = [0, 1];
+
+    return function memoFibonacci(n) {
+      if (!memo[n] && memo[n] !== 0) {
+        memo[n] = memoFibonacci(n - 1) + memoFibonacci(n - 2);
+      }
+      return memo[n];
+    };
+  }()),
 };

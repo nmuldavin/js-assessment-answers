@@ -1,83 +1,59 @@
 exports = (typeof window === 'undefined') ? global : window;
 
 exports.functionsAnswers = {
-  argsAsArray : function(fn, arr) {
-    return(fn(arr[0], arr[1], arr[2]));
+  argsAsArray(fn, arr) {
+    return fn(...arr);
   },
 
-  speak : function(fn, obj) {
+  speak(fn, obj) {
     return fn.call(obj, fn);
   },
 
-  functionFunction : function(str) {
-    return function(message) {
-      return str + ', ' + message;
-    }
+  functionFunction(str) {
+    return message => `${str}, ${message}`;
   },
 
-  makeClosures : function(arr, fn) {
-    var out = [];
-
-    var makefunction = function(value) {
-      return function() {return fn(value)}
-    }
-
-    for (var i = 0; i < arr.length; i++) {
-      out.push(makefunction(arr[i]));
-    }
-
-    return out;
+  makeClosures(arr, fn) {
+    return arr.map(val => () => fn(val));
   },
 
-  partial : function(fn, str1, str2) {
-    return function(ex) {
-      return fn(str1, str2, ex);
-    };
+  partial(fn, str1, str2) {
+    return ex => fn(str1, str2, ex);
   },
 
-  useArguments : function() {
-    var i, sum = 0;
-    for (i = 0; i < arguments.length; i++) {
-      sum += arguments[i];
-    }
-    return sum;
+  useArguments(...args) {
+    return args.reduce((sum, curr) => sum + curr, 0);
   },
 
-  callIt : function(fn) {
-    // making args array so that I can use shift()
-    var args = Array.prototype.slice.call(arguments, 1, arguments.length);
-
-    return fn.apply(this, args);
+  callIt(fn, ...args) {
+    return fn(...args);
   },
 
-  partialUsingArguments : function(fn) {
-    var args = Array.prototype.slice.call(arguments, 1, arguments.length);
-    return function() {
-      var args2 = Array.prototype.slice.call(arguments);
-      args2 = args.concat(args2);
-      return fn.apply(null, args2);
-    };
+  partialUsingArguments(fn, ...args) {
+    return (...moreArgs) => fn(...args, ...moreArgs);
   },
 
-  curryIt : function(fn) {
-    function applyArguments(fn, arguments) {
-      return fn.apply(null, arguments);
-    }
+  curryIt(fn) {
+    /**
+     * accumulate - Inner function to accumulate args or return
+     * Adds current arg to array. If array length equals number
+     * of expected arguments, evaluates provided function with those arguments, otherwise
+     * returns a function that calls itself
+     * @param  {Array}    args Accumulating array of arguments
+     * @param  {*}        arg  current argument
+     * @param  {Function} func Function to apply
+     * @return {Function|*}    function or evaluated function
+     */
+    function accumulate(args, arg, func) {
+      args.push(arg);
+      if (args.length === func.length) {
+        return func(...args);
+      }
 
-    function getArgumentAccumulator(accumulatedArguments, expectedArgumentsCount) {
-      return function (currentArgument) {
-        accumulatedArguments.push(currentArgument);
-
-        var allArgumentsProvided = accumulatedArguments.length === expectedArgumentsCount;
-
-        if (allArgumentsProvided) {
-          return applyArguments(fn, accumulatedArguments);
-        } else {
-          return getArgumentAccumulator(accumulatedArguments, expectedArgumentsCount);
-        }
-      };
+      return nextArg => accumulate(args, nextArg, func);
     }
 
-    return getArgumentAccumulator([], fn.length);
-  }
+    // return function that calls accumulate to start
+    return arg => accumulate([], arg, fn);
+  },
 };

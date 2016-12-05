@@ -7,29 +7,29 @@ exports = (typeof window === 'undefined') ? global : window;
  */
 
 exports.bestPracticesAnswers = {
-  globals : function() {
-    var myObject = {
-      name : 'Jory'
+  globals() {
+    return {
+      name: 'Jory',
     };
-
-    return myObject;
   },
 
-  functions : function(flag) {
+  functions(flag) {
     if (flag) {
-      function getValue() { return 'a'; }
-    } else {
-      function getValue() { return 'b'; }
+      return (function getValueA() {
+        return 'a';
+      }());
     }
 
-    return getValue();
+    return (function getValueB() {
+      return 'b';
+    }());
   },
 
-  parseInt : function(num) {
+  parseInt(num) {
     return parseInt(num, 10);
   },
 
-  identity : function(val1, val2) {
+  identity(val1, val2) {
     return val1 === val2;
-  }
+  },
 };

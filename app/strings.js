@@ -44,25 +44,6 @@ exports.stringsAnswers = {
     }, { lineLength: 0, accum: '' });
 
     return accum;
-    // var words = str.split(" ");
-    // var out = "";
-    // var linelength = 0;
-    // for (var i = 0; i < words.length; i++) {
-    //     if (linelength + words[i].length <= cols) {
-    //         if (linelength !== 0) {
-    //             out += " ";
-    //         }
-    //         out += words[i];
-    //         linelength += words[i].length;
-    //     } else {
-    //         if (linelength !== 0) {
-    //             out += "\n";
-    //         }
-    //         out += words[i];
-    //         linelength = words[i].length;
-    //     }
-    // }
-    // return out;
   },
 
   reverseString(str) {
